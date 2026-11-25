@@ -1,0 +1,99 @@
+/* Seelig Designs – Design Tokens (abgeleitet aus design-system/tokens.css)
+   Typografie für Standalone-Web-App: selbst gehostetes Lexend (SIL OFL 1.1) */
+
+:root {
+  color-scheme: dark;
+
+  /* Samus Farben */
+  --yellow: #f2cb07;
+  --gold: #f2b807;
+  --amber: #f2a007;
+  --orange: #d97a07;
+  --rust: #bf4a06;
+  --accent: var(--amber);
+  --accent-hover: var(--gold);
+  --on-accent: #121212;
+
+  /* Grounds & Surfaces */
+  --bg: #121212;
+  --surface: #181818;
+  --surface-card: #1c1c1c;
+  --surface-elevated: #222222;
+  --surface-panel: rgba(28, 28, 28, 0.92);
+  --fill-subtle: rgba(255, 255, 255, 0.03);
+  --fill-chip: rgba(255, 255, 255, 0.04);
+  --fill-hover: rgba(255, 255, 255, 0.08);
+  --field: rgba(0, 0, 0, 0.35);
+  --field-focus: rgba(0, 0, 0, 0.55);
+
+  /* Text ladder (mindestens 5.0:1 auf #181818) */
+  --text: #ffffff;
+  --text-soft: #eaeaea;
+  --text-secondary: #e0e0e0;
+  --text-muted: #d0d0d0;
+  --text-label: #cccccc;
+  --text-subtle: #aaaaaa;
+  --text-caption: #888888;
+  --text-note: #f0e2c8;
+
+  /* Hairlines */
+  --line-faint: rgba(255, 255, 255, 0.05);
+  --line-subtle: rgba(255, 255, 255, 0.08);
+  --line: rgba(255, 255, 255, 0.1);
+  --line-strong: rgba(255, 255, 255, 0.15);
+  --line-control: rgba(255, 255, 255, 0.2);
+  --line-toggle: rgba(255, 255, 255, 0.3);
+
+  /* Accent overlays */
+  --accent-overlay: rgba(242, 160, 7, 0.8);
+  --accent-border-soft: rgba(242, 160, 7, 0.5);
+  --accent-glow: rgba(242, 160, 7, 0.2);
+  --accent-wash: rgba(242, 160, 7, 0.1);
+  --hero-tint: rgba(255, 170, 0, 0.28);
+
+  /* Semantische Statusfarben (hoher Kontrast auf #181818) */
+  --status-ok: #6ee7a0;
+  --status-ok-bg: rgba(110, 231, 160, 0.1);
+  --status-ok-border: rgba(110, 231, 160, 0.4);
+  --status-err: #ff8577;
+  --status-err-bg: rgba(255, 133, 119, 0.12);
+  --status-err-border: rgba(255, 133, 119, 0.45);
+
+  /* Scrims */
+  --scrim-lightbox: rgba(8, 8, 8, 0.88);
+  --scrim-counter: rgba(0, 0, 0, 0.55);
+
+  /* Schrift */
+  --font-sans: "Lexend", system-ui, -apple-system, sans-serif;
+
+  /* Abstände */
+  --space-1: 0.5rem;
+  --space-1-5: 0.75rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2rem;
+  --space-6: 3rem;
+  --space-8: 4rem;
+  --space-12: 6rem;
+  --header-height: 5.5rem;
+
+  /* Radien */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-gallery: 12px;
+  --radius-lg: 15px;
+  --radius-xl: 20px;
+  --radius-pill: 50px;
+  --radius-round: 50%;
+
+  /* Schatten (nur für schwebende Panels/Dialoge, Karten bleiben flach) */
+  --shadow-tile: 0 5px 15px rgba(0, 0, 0, 0.4);
+  --shadow-lift: 0 10px 20px rgba(0, 0, 0, 0.25);
+  --shadow-panel: 0 20px 50px rgba(0, 0, 0, 0.5);
+  --shadow-focus: 0 0 10px rgba(242, 160, 7, 0.2);
+  --shadow-glass:
+    inset 0 0 2px 1px rgba(255, 255, 255, 0.12),
+    inset 0 0 10px 4px rgba(255, 255, 255, 0.04),
+    0 4px 16px rgba(0, 0, 0, 0.25);
+}

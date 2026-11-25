@@ -1,0 +1,11 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Minimale gehärtete Rechte für Seelig PDF: kein offener Dateisystem-Zugriff, keine Shell.",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "opener:allow-open-url",
+    "updater:default"
+  ]
+}

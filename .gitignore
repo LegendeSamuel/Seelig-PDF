@@ -1,0 +1,9 @@
+node_modules/
+dist/
+tests/screenshots/
+test-results/
+playwright-report/
+.vite/
+*.local
+src-tauri/target/
+release-assets/

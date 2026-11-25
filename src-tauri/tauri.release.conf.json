@@ -1,0 +1,14 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "bundle": {
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "__REPLACE_WITH_TAURI_SIGNING_PUBLIC_KEY__",
+      "endpoints": [
+        "https://github.com/LegendeSamuel/Seelig-PDF/releases/latest/download/latest.json"
+      ]
+    }
+  }
+}

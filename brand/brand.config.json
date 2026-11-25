@@ -1,0 +1,25 @@
+{
+  "appName": "Seelig PDF",
+  "shortBadge": "PDF",
+  "brandName": "Seelig Designs",
+  "author": "Samuel Seelig",
+  "motto": "Wäre es einfach, wäre es langweilig.",
+  "tagline": "Werkzeuge für deine PDFs – lokal verarbeitet, ohne Uploads, ohne Tracking.",
+  "domain": "pdf.seelig-designs.eu",
+  "websiteUrl": "https://seelig-designs.eu/",
+  "imprintUrl": "https://seelig-designs.eu/imprint.html",
+  "privacyUrl": "https://seelig-designs.eu/privacy-policy.html",
+  "githubRepo": "https://github.com/LegendeSamuel/Seelig-PDF",
+  "githubReleasesUrl": "https://github.com/LegendeSamuel/Seelig-PDF/releases",
+  "updaterEndpoint": "https://github.com/LegendeSamuel/Seelig-PDF/releases/latest/download/latest.json",
+  "contact": {
+    "email": "info@seelig-designs.eu",
+    "instagramUrl": "https://www.instagram.com/samuel.seelig/",
+    "portfolioUrl": "https://www.pexels.com/de-de/@samuel-seelig-5998373/"
+  },
+  "assets": {
+    "wordmarkLight": "/assets/brand/wordmark-white.svg",
+    "markLight": "/assets/brand/mark-white.svg",
+    "markDarkOnAccent": "/assets/brand/mark-black.svg"
+  }
+}

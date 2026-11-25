@@ -1,0 +1,3 @@
+# Build output outside OneDrive so sync locks never interfere with Cargo/Rust.
+[build]
+target-dir = "C:/Users/flapp/.cargo-targets/seelig-pdf"

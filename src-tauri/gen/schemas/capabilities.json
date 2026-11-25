@@ -1,0 +1,1 @@
+{"default":{"identifier":"default","description":"Minimale gehärtete Rechte für Seelig PDF: kein offener Dateisystem-Zugriff, keine Shell.","local":true,"windows":["main"],"permissions":["core:default","opener:allow-open-url","updater:default"]}}

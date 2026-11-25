@@ -1,0 +1,9 @@
+export const MAX_FILE_BYTES = 100 * 1024 * 1024; // 100 MB per file
+export const MAX_BATCH_BYTES = 250 * 1024 * 1024; // 250 MB total batch
+export const MAX_FILES = 50;
+export const MAX_PAGES = 500;
+export const MAX_TEXT_BYTES = 2 * 1024 * 1024; // 2 MB for text/markdown/xml inputs
+export const MAX_CANVAS_DIM = 4096;
+export const MAX_CANVAS_PIXELS = 16_777_216; // 16 MP
+export const WORKER_TIMEOUT_MS = 60_000;
+export const MAX_NESTING_DEPTH = 128;

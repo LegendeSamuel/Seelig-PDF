@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seelig PDF – Reader &amp; Werkzeuge</title>
+  <meta name="description" content="PDF-Reader und 33 PDF-Werkzeuge direkt im Browser und als schlanke Windows-App – lokal verarbeitet, ohne Uploads, ohne Tracking.">
+  <meta name="author" content="Samuel Seelig">
+  <meta name="referrer" content="no-referrer">
+  <link rel="icon" href="/assets/brand/app-icon.svg" type="image/svg+xml">
+</head>
+<body>
+  <a href="#main-content" class="skip-link visually-hidden">Zum Inhalt springen</a>
+
+  <header class="sd-header">
+    <div class="sd-header-inner">
+      <a href="#/" class="brand-link" id="brand-home-link" aria-label="Seelig PDF Startseite">
+        <img src="/assets/brand/wordmark-white.svg" alt="Seelig Designs" class="brand-wordmark" id="brand-wordmark-img">
+        <span class="brand-badge" id="brand-badge-text">PDF</span>
+      </a>
+      <nav class="nav-primary" aria-label="Hauptnavigation">
+        <ul>
+          <li><a href="#/" class="nav-link" id="nav-hub-link">Alle Werkzeuge</a></li>
+          <li><a href="#/reader" class="nav-link" id="nav-reader-link">PDF-Reader</a></li>
+          <li>
+            <button
+              type="button"
+              class="nav-link"
+              id="nav-security-btn"
+              command="show-modal"
+              commandfor="security-dialog"
+            >Sicherheit</button>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="nav-link"
+              id="nav-updates-btn"
+              hidden
+            >Updates</button>
+          </li>
+          <li>
+            <a
+              href="https://seelig-designs.eu/"
+              class="nav-link"
+              id="nav-website-link"
+              target="_blank"
+              rel="noopener noreferrer"
+            >Seelig Designs</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <div id="live-polite" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+    <div id="live-alert" class="visually-hidden" role="alert" aria-atomic="true"></div>
+    <div id="app-root" class="page-shell"></div>
+  </main>
+
+  <div id="print-stage" aria-hidden="true"></div>
+
+  <dialog id="security-dialog" closedby="any" aria-labelledby="security-dialog-title">
+    <div class="dialog-header">
+      <h1 id="security-dialog-title">Sicherheitsarchitektur &amp; Transparenz</h1>
+      <button type="button" class="slider-btn" id="security-dialog-close" command="close" commandfor="security-dialog" aria-label="Sicherheitsdialog schließen" autofocus>×</button>
+    </div>
+    <div id="security-dialog-body" class="dialog-body"></div>
+  </dialog>
+
+  <dialog id="preview-dialog" closedby="any" aria-labelledby="preview-dialog-title">
+    <div class="dialog-header">
+      <h1 id="preview-dialog-title">Seitenvorschau</h1>
+      <button type="button" class="slider-btn" id="preview-dialog-close" command="close" commandfor="preview-dialog" aria-label="Vorschau schließen" autofocus>×</button>
+    </div>
+    <div id="preview-dialog-body" class="dialog-body"></div>
+  </dialog>
+
+  <dialog id="updater-dialog" closedby="any" aria-labelledby="updater-dialog-title">
+    <div class="dialog-header">
+      <h1 id="updater-dialog-title">App-Updates</h1>
+      <button type="button" class="slider-btn" id="updater-dialog-close" command="close" commandfor="updater-dialog" aria-label="Update-Dialog schließen" autofocus>×</button>
+    </div>
+    <div id="updater-dialog-body" class="dialog-body"></div>
+  </dialog>
+
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-logo">
+        <a href="https://seelig-designs.eu/" id="footer-website-link" target="_blank" rel="noopener noreferrer" aria-label="Seelig Designs Website">
+          <img src="/assets/brand/mark-black.svg" alt="Seelig Designs" id="footer-mark-img">
+        </a>
+      </div>
+      <nav class="footer-nav" aria-label="Rechtliches und Links">
+        <ul>
+          <li><a href="#/">Alle Werkzeuge</a></li>
+          <li><a href="#/reader">PDF-Reader</a></li>
+          <li><button type="button" id="footer-security-btn" command="show-modal" commandfor="security-dialog">Sicherheit</button></li>
+          <li><a href="https://seelig-designs.eu/imprint.html" id="footer-imprint-link" target="_blank" rel="noopener noreferrer">Impressum</a></li>
+          <li><a href="https://seelig-designs.eu/privacy-policy.html" id="footer-privacy-link" target="_blank" rel="noopener noreferrer">Datenschutz</a></li>
+        </ul>
+      </nav>
+      <div class="footer-contact">
+        <a href="mailto:info@seelig-designs.eu" id="footer-email-link" aria-label="E-Mail schreiben">
+          <img src="/assets/icons/email.svg" alt="" class="footer-icon">
+        </a>
+        <a href="https://www.instagram.com/samuel.seelig/" id="footer-instagram-link" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+          <img src="/assets/icons/instagram.svg" alt="" class="footer-icon">
+        </a>
+        <a href="https://www.pexels.com/de-de/@samuel-seelig-5998373/" id="footer-portfolio-link" target="_blank" rel="noopener noreferrer" aria-label="Pexels Portfolio">
+          <img src="/assets/icons/camera.svg" alt="" class="footer-icon">
+        </a>
+      </div>
+    </div>
+    <div class="footer-bottom-bar">
+      <p id="footer-copyright-line">© 2026 Samuel Seelig · Seelig PDF · Verarbeitung ausschließlich lokal</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+name: Release Desktop (Windows)
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release-windows:
+    name: Build & Draft Windows Release
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Install dependencies & Chromium
+        run: |
+          npm ci
+          npx playwright install chromium
+
+      - name: Verify full Web, Security & Red-Team suite
+        run: npm run verify:all
+
+      - name: Verify Rust tests & clippy
+        run: |
+          cargo test --manifest-path src-tauri/Cargo.toml
+          cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
+
+      - name: Inject Updater Public Key (when configured)
+        shell: pwsh
+        run: |
+          $pub = "${{ secrets.TAURI_SIGNING_PUBLIC_KEY }}"
+          if (-not [string]::IsNullOrWhiteSpace($pub)) {
+            $conf = Get-Content src-tauri/tauri.release.conf.json -Raw
+            $conf = $conf.Replace("__REPLACE_WITH_TAURI_SIGNING_PUBLIC_KEY__", $pub.Trim())
+            Set-Content src-tauri/tauri.release.conf.json $conf -Encoding UTF8
+          }
+
+      - name: Build Windows Installer (NSIS + MSI)
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        shell: pwsh
+        run: |
+          if (-not [string]::IsNullOrWhiteSpace("${{ secrets.TAURI_SIGNING_PUBLIC_KEY }}")) {
+            npx tauri build --config src-tauri/tauri.release.conf.json
+          } else {
+            npx tauri build
+          }
+
+      - name: Collect installers, latest.json & SHA256SUMS.txt
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path release-assets | Out-Null
+          $files = Get-ChildItem -Path src-tauri/target/release/bundle, C:/Users -Recurse -Include *.exe, *.msi, *.sig -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'bundle' }
+          if (-not $files) {
+            $files = Get-ChildItem -Recurse -Path . -Include *.exe, *.msi, *.sig | Where-Object { $_.FullName -match 'bundle' }
+          }
+          foreach ($f in $files) {
+            Copy-Item $f.FullName -Destination release-assets/ -Force
+          }
+          $hashes = Get-ChildItem release-assets -File | Sort-Object Name | ForEach-Object {
+            $h = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$h  $($_.Name)"
+          }
+          Set-Content release-assets/SHA256SUMS.txt ($hashes -join "`n") -Encoding UTF8
+
+          $tag = if ($env:GITHUB_REF_NAME -match '^v(.+)$') { $matches[1] } else { '1.0.0' }
+          $exe = Get-ChildItem release-assets -Filter '*setup.exe' | Select-Object -First 1
+          $sig = if ($exe) { Get-Item "release-assets/$($exe.Name).sig" -ErrorAction SilentlyContinue } else { $null }
+          if ($exe -and $sig) {
+            $latest = @{
+              version = $tag
+              notes = "Siehe GitHub-Release-Notizen fuer v$tag."
+              pub_date = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+              platforms = @{
+                "windows-x86_64" = @{
+                  signature = (Get-Content $sig.FullName -Raw).Trim()
+                  url = "https://github.com/LegendeSamuel/Seelig-PDF/releases/download/v$tag/$($exe.Name)"
+                }
+              }
+            } | ConvertTo-Json -Depth 5
+            Set-Content release-assets/latest.json $latest -Encoding UTF8
+          }
+
+      - name: Create Draft GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+        run: |
+          $tag = if ($env:GITHUB_REF_NAME) { $env:GITHUB_REF_NAME } else { "v1.0.0" }
+          $assets = Get-ChildItem release-assets -File | ForEach-Object { $_.FullName }
+          gh release create $tag @assets --draft --generate-notes --title "Seelig PDF $tag"
