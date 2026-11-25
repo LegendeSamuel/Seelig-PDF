@@ -29,7 +29,7 @@ export function createPageGrid({
       loadedDocs.push(doc);
       for (let p = 0; p < doc.numPages; p++) {
         items.push({
-          uid: `${fIdx}-${p}-${Math.random().toString(36).slice(2, 7)}`,
+          uid: `${fIdx}-${p}-${crypto.randomUUID()}`,
           fileIndex: fIdx,
           fileName: fileItems[fIdx].name,
           pageIndex: p,
@@ -147,7 +147,7 @@ export function createPageGrid({
               onClick: async () => {
                 items.splice(idx + 1, 0, {
                   ...item,
-                  uid: `${item.fileIndex}-${item.pageIndex}-${Math.random().toString(36).slice(2, 7)}`
+                  uid: `${item.fileIndex}-${item.pageIndex}-${crypto.randomUUID()}`
                 });
                 await render();
                 onChange(items);

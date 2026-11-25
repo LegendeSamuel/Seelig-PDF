@@ -5,6 +5,9 @@ on:
     branches: [main, master]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   verify:
     name: Verify Web, Security & Windows Tauri (${{ matrix.os }})

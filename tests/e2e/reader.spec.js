@@ -72,7 +72,43 @@ test.describe('Seelig PDF Reader, Split-View, Search, Handoff & Security', () =>
       return Array.from(spans).some((s) => s.textContent.includes('Seelig Alpha Testtext'));
     });
     await expect(page.locator('.sidebar-thumb-btn')).toHaveCount(3);
+
+    // Assert zero outer page scrolling & full-width fluid Reader layout
+    const layoutMetrics = await page.evaluate(() => {
+      const bodyRect = document.querySelector('.reader-body')?.getBoundingClientRect();
+      return {
+        docScrollH: document.documentElement.scrollHeight,
+        innerH: window.innerHeight,
+        bodyWidth: bodyRect?.width || 0,
+        innerW: window.innerWidth
+      };
+    });
+    expect(layoutMetrics.docScrollH).toBeLessThanOrEqual(layoutMetrics.innerH + 1);
+    expect(layoutMetrics.bodyWidth).toBeGreaterThanOrEqual(layoutMetrics.innerW - 2);
+
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '06-reader-desktop.png') });
+
+    // Verify top-left Adobe/Apple-style menubar, hover-switching, keyboard ArrowRight & Vollansicht
+    await page.locator('#menu-view-trigger').click();
+    await expect(page.locator('#menu-view-trigger')).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.locator('#menu-view')).toBeVisible();
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '09-reader-menubar-open.png') });
+
+    // Hover switches directly from Ansicht to Datei when open
+    await page.locator('#menu-file-trigger').hover();
+    await expect(page.locator('#menu-file-trigger')).toHaveAttribute('aria-expanded', 'true');
+    // Keyboard ArrowRight switches back to Ansicht preview
+    await page.keyboard.press('ArrowRight');
+    await expect(page.locator('#menu-view-trigger')).toHaveAttribute('aria-expanded', 'true');
+
+    // Click Vollansicht inside Ansicht menu -> hides topbar/toolbar cleanly & Esc restores
+    await page.locator('[data-menu-action="view-fullscreen"]').click();
+    await expect(page.locator('html.is-fullscreen-reading')).toHaveCount(1);
+    await expect(page.locator('.app-topbar')).toBeHidden();
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '10-reader-fullscreen.png') });
+    await page.keyboard.press('Escape');
+    await expect(page.locator('html.is-fullscreen-reading')).toHaveCount(0);
+    await expect(page.locator('.app-topbar')).toBeVisible();
 
     // Full-document Ctrl+F search with highlighted <mark>
     await page.keyboard.press('Control+f');
@@ -122,7 +158,7 @@ test.describe('Seelig PDF Reader, Split-View, Search, Handoff & Security', () =>
     // Updates button is hidden in Web mode; GitHub Releases banner is visible on Hub
     await expect(page.locator('#nav-updates-btn')).toBeHidden();
     await page.goto('/#/');
-    const ghLink = page.locator('a[href="https://github.com/LegendeSamuel/Seelig-PDF/releases"]').first();
+    const ghLink = page.locator('#app-root a[href="https://github.com/LegendeSamuel/Seelig-PDF/releases"]').first();
     await expect(ghLink).toBeVisible();
 
     expect(externalRequests).toEqual([]);

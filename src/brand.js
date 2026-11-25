@@ -7,10 +7,10 @@ export const BRAND = Object.freeze({
 });
 
 export function applyBrandChrome() {
-  const wordmark = document.getElementById('brand-wordmark-img');
-  if (wordmark) {
-    wordmark.src = BRAND.assets.wordmarkLight;
-    wordmark.alt = BRAND.brandName;
+  const brandMark = document.getElementById('brand-wordmark-img');
+  if (brandMark) {
+    brandMark.src = BRAND.assets.markLight;
+    brandMark.alt = BRAND.brandName;
   }
 
   const badge = document.getElementById('brand-badge-text');
@@ -22,8 +22,17 @@ export function applyBrandChrome() {
   const websiteNav = document.getElementById('nav-website-link');
   if (websiteNav) {
     websiteNav.href = BRAND.websiteUrl;
-    websiteNav.textContent = BRAND.brandName;
+    websiteNav.textContent = `${BRAND.brandName} Website`;
   }
+
+  const menuReleases = document.getElementById('menu-releases-link');
+  if (menuReleases) menuReleases.href = BRAND.githubReleasesUrl;
+
+  const menuImprint = document.getElementById('menu-imprint-link');
+  if (menuImprint) menuImprint.href = BRAND.imprintUrl;
+
+  const menuPrivacy = document.getElementById('menu-privacy-link');
+  if (menuPrivacy) menuPrivacy.href = BRAND.privacyUrl;
 
   const footerMark = document.getElementById('footer-mark-img');
   if (footerMark) {

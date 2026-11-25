@@ -1,6 +1,6 @@
 [package]
 name = "seelig-pdf"
-version = "1.0.0"
+version = "1.0.1"
 description = "Seelig PDF – Sicherer PDF-Reader und 33 PDF-Werkzeuge"
 authors = ["Samuel Seelig"]
 edition = "2021"

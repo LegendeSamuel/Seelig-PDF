@@ -194,7 +194,7 @@ export function createInteractivePdfStage({
 
     const extra = activePayloadProvider(currentPage) || {};
     const entry = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      id: `${Date.now()}-${crypto.randomUUID()}`,
       pageNumber: currentPage,
       x,
       y,
@@ -234,7 +234,7 @@ export function createInteractivePdfStage({
     getBoxes: () => boxes,
     getCurrentPage: () => currentPage,
     addBoxManual: (entry) => {
-      boxes.push({ id: `${Date.now()}-${Math.random()}`, pageNumber: currentPage, ...entry });
+      boxes.push({ id: crypto.randomUUID(), pageNumber: currentPage, ...entry });
       renderOverlays();
       onBoxesChange(boxes);
     },

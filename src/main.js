@@ -7,6 +7,7 @@ import { BRAND, applyBrandChrome } from './brand.js';
 import { clear, el, svgIcon } from './ui/dom.js';
 import { wireDialogHelpers } from './ui/dialogs.js';
 import { wireUpdaterDialog } from './ui/updater-dialog.js';
+import { wireAppMenubar } from './ui/menubar.js';
 import { announcePolite } from './ui/announcer.js';
 import { CATEGORIES, TOOLS, getToolById } from './tools/registry.js';
 import { getWorkerPolicy } from './security/trusted-types.js';
@@ -32,14 +33,39 @@ const navUpdatesBtn = document.getElementById('nav-updates-btn');
 const readerTabStore = createReaderTabStore();
 let activeCategory = 'all';
 let searchQuery = '';
+const securityDialog = document.getElementById('security-dialog');
+const aboutDialog = document.getElementById('about-dialog');
+const footerSecurityBtn = document.getElementById('footer-security-btn');
+
 let activeCleanup = null;
 let activeReaderView = null;
 let pendingChainFiles = [];
 let pendingReaderFiles = [];
+let appMenubar = { syncState: () => {} };
+
+function syncAppMenubarState() {
+  if (activeReaderView) {
+    appMenubar.syncState(activeReaderView.getMenuState());
+  } else {
+    appMenubar.syncState({
+      hasActivePdf: false,
+      isReaderRoute: false,
+      viewMode: 'single',
+      readingMode: 'original',
+      sidebarOpen: true,
+      splitActive: false,
+      fullscreen: false
+    });
+  }
+}
 
 function syncNavCurrent(routeKind) {
   if (navHubLink) navHubLink.setAttribute('aria-current', routeKind === 'hub' ? 'page' : 'false');
   if (navReaderLink) navReaderLink.setAttribute('aria-current', routeKind === 'reader' ? 'page' : 'false');
+  if (appRoot) appRoot.classList.toggle('is-reader-root', routeKind === 'reader');
+  if (routeKind !== 'reader') {
+    document.documentElement.classList.remove('is-fullscreen-reading');
+  }
 }
 
 function populateSecurityDialog() {
@@ -268,6 +294,7 @@ function renderHub() {
 
   renderGrid();
   appRoot.append(hero, desktopBanner, controls, gridHost);
+  syncAppMenubarState();
 }
 
 async function renderReaderView() {
@@ -285,14 +312,18 @@ async function renderReaderView() {
       window.location.hash = '#/';
     },
     onSendToTool: (toolId, fileObj) => {
-      pendingChainFiles = [fileObj];
+      pendingChainFiles = fileObj ? [fileObj] : [];
       window.location.hash = `#/tool/${toolId}`;
+    },
+    onStateChange: (state) => {
+      appMenubar.syncState(state);
     }
   });
 
   activeCleanup = view.cleanup;
   activeReaderView = view;
   appRoot.appendChild(view.element);
+  syncAppMenubarState();
 
   if (pendingReaderFiles.length > 0) {
     const batch = [...pendingReaderFiles];
@@ -333,6 +364,7 @@ function renderToolView(tool) {
 
   activeCleanup = instance.cleanup;
   appRoot.appendChild(instance.element);
+  syncAppMenubarState();
   const h1 = document.getElementById('tool-heading');
   if (h1) h1.focus();
   announcePolite(`${tool.name} geöffnet.`);
@@ -361,6 +393,71 @@ async function init() {
   wireDialogHelpers();
   populateSecurityDialog();
   const updater = wireUpdaterDialog();
+
+  if (footerSecurityBtn && aboutDialog) {
+    footerSecurityBtn.addEventListener('click', () => {
+      if (aboutDialog.open) aboutDialog.close();
+    });
+  }
+
+  appMenubar = wireAppMenubar({
+    onAction: (action) => {
+      if (action === 'go-hub') {
+        window.location.hash = '#/';
+        return;
+      }
+      if (action === 'open-security') {
+        if (aboutDialog?.open) aboutDialog.close();
+        if (securityDialog && !securityDialog.open) securityDialog.showModal();
+        return;
+      }
+      if (action === 'open-updates') {
+        updater?.openDialog();
+        return;
+      }
+      if (action === 'open-about') {
+        if (aboutDialog && !aboutDialog.open) aboutDialog.showModal();
+        return;
+      }
+      if (action === 'file-open') {
+        if (activeReaderView) {
+          activeReaderView.openFilePicker();
+        } else {
+          window.location.hash = '#/reader';
+          requestAnimationFrame(() => activeReaderView?.openFilePicker());
+        }
+        return;
+      }
+      if (action === 'view-fullscreen') {
+        if (activeReaderView) {
+          activeReaderView.toggleFullscreen();
+        } else {
+          window.location.hash = '#/reader';
+          requestAnimationFrame(() => activeReaderView?.toggleFullscreen());
+        }
+        return;
+      }
+      if (!activeReaderView) return;
+      if (action === 'file-save') activeReaderView.handleSave(false);
+      else if (action === 'file-save-as') activeReaderView.handleSave(true);
+      else if (action === 'file-print') activeReaderView.handlePrint();
+      else if (action === 'file-close-tab') activeReaderView.closeActiveTab();
+      else if (action === 'view-sidebar') activeReaderView.toggleSidebar();
+      else if (action === 'view-split') activeReaderView.cycleSplitMode();
+      else if (action === 'view-search') activeReaderView.toggleSearchBar(true);
+      else if (action === 'view-rotate') activeReaderView.rotateView();
+      else if (action.startsWith('view-mode-')) activeReaderView.setViewMode(action.replace('view-mode-', ''));
+      else if (action.startsWith('reading-mode-')) activeReaderView.setReadingMode(action.replace('reading-mode-', ''));
+    },
+    onToolSelect: (toolId) => {
+      if (activeReaderView) {
+        activeReaderView.handoffActiveToTool(toolId);
+      } else {
+        pendingChainFiles = [];
+        window.location.hash = `#/tool/${toolId}`;
+      }
+    }
+  });
 
   if (isDesktopApp() && navUpdatesBtn && updater) {
     navUpdatesBtn.hidden = false;

@@ -65,7 +65,8 @@ function wireRovingFocusFallback(container, getItems, orientation = 'horizontal'
 export function createReaderView({
   tabStore,
   onGoTools,
-  onSendToTool
+  onSendToTool,
+  onStateChange = () => {}
 }) {
   const root = el('section', { className: 'reader-shell', 'aria-labelledby': 'reader-heading' });
   const heading = el('h1', { id: 'reader-heading', className: 'visually-hidden', tabindex: '-1' }, 'Seelig PDF Reader');
@@ -76,7 +77,24 @@ export function createReaderView({
   let currentMatches = [];
   let currentMatchIdx = -1;
   let searchOpen = false;
-  let focusMode = false;
+  let fullscreenMode = false;
+
+  function getMenuState() {
+    const hasActivePdf = Boolean(tabStore.getActiveTab());
+    return {
+      hasActivePdf,
+      isReaderRoute: true,
+      viewMode: prefs.viewMode,
+      readingMode: prefs.readingMode,
+      sidebarOpen: prefs.sidebarOpen,
+      splitActive: tabStore.state.splitMode !== 'off' && hasActivePdf,
+      fullscreen: fullscreenMode
+    };
+  }
+
+  function notifyState() {
+    onStateChange(getMenuState());
+  }
 
   const primaryViewport = createPdfViewport({
     onCurrentPageChange: (pageNum) => {
@@ -137,38 +155,8 @@ export function createReaderView({
     className: 'tb-btn',
     'aria-pressed': String(prefs.sidebarOpen),
     title: 'Seitenleiste ein-/ausblenden',
-    onClick: () => {
-      prefs.sidebarOpen = !prefs.sidebarOpen;
-      saveReaderPrefs({ sidebarOpen: prefs.sidebarOpen });
-      btnSidebar.setAttribute('aria-pressed', String(prefs.sidebarOpen));
-      syncBodyGridClasses();
-      primaryViewport.refit().catch(() => {});
-    }
+    onClick: () => toggleSidebar()
   }, 'Seitenleiste');
-
-  const btnSave = el('button', {
-    type: 'button',
-    className: 'tb-btn',
-    'aria-disabled': 'true',
-    title: 'Speichern (Strg+S)',
-    onClick: () => handleSave(false)
-  }, 'Speichern');
-
-  const btnSaveAs = el('button', {
-    type: 'button',
-    className: 'tb-btn',
-    'aria-disabled': 'true',
-    title: 'Speichern unter (Strg+Umschalt+S)',
-    onClick: () => handleSave(true)
-  }, 'Speichern unter');
-
-  const btnPrint = el('button', {
-    type: 'button',
-    className: 'tb-btn',
-    'aria-disabled': 'true',
-    title: 'Drucken (Strg+P)',
-    onClick: () => handlePrint()
-  }, 'Drucken');
 
   const btnSplit = el('button', {
     type: 'button',
@@ -186,28 +174,31 @@ export function createReaderView({
     onClick: () => toggleSearchBar()
   }, svgIcon('search', 16), 'Suche');
 
-  const btnFocusMode = el('button', {
+  const btnFullscreenMode = el('button', {
     type: 'button',
     className: 'tb-btn',
     'aria-pressed': 'false',
-    title: 'Fokusmodus (F11)',
-    onClick: () => {
-      focusMode = !focusMode;
-      root.classList.toggle('is-focus-mode', focusMode);
-      btnFocusMode.setAttribute('aria-pressed', String(focusMode));
-    }
-  }, 'Fokus');
+    title: 'Vollansicht (F11)',
+    onClick: () => setFullscreenReading(!fullscreenMode, { requestNative: true })
+  }, 'Vollansicht');
+
+  const fullscreenExitBtn = el(
+    'button',
+    {
+      type: 'button',
+      className: 'fullscreen-exit-pill',
+      hidden: true,
+      onClick: () => setFullscreenReading(false, { requestNative: true })
+    },
+    'Vollansicht beenden (Esc)'
+  );
 
   const viewModeSelect = el(
     'select',
     {
       className: 'tb-select',
       'aria-label': 'Seitenlayout wählen',
-      onChange: () => {
-        prefs.viewMode = viewModeSelect.value;
-        saveReaderPrefs({ viewMode: prefs.viewMode });
-        primaryViewport.setLayoutOptions({ viewMode: prefs.viewMode });
-      }
+      onChange: () => setViewMode(viewModeSelect.value)
     },
     el('option', { value: 'single', selected: prefs.viewMode === 'single' }, 'Einzelseite'),
     el('option', { value: 'two-page', selected: prefs.viewMode === 'two-page' }, 'Zwei Seiten'),
@@ -219,12 +210,7 @@ export function createReaderView({
     {
       className: 'tb-select',
       'aria-label': 'Lesemodus wählen',
-      onChange: () => {
-        prefs.readingMode = readingModeSelect.value;
-        saveReaderPrefs({ readingMode: prefs.readingMode });
-        primaryViewport.setLayoutOptions({ readingMode: prefs.readingMode });
-        secondaryViewport.setLayoutOptions({ readingMode: prefs.readingMode });
-      }
+      onChange: () => setReadingMode(readingModeSelect.value)
     },
     el('option', { value: 'original', selected: prefs.readingMode === 'original' }, 'Original'),
     el('option', { value: 'sepia', selected: prefs.readingMode === 'sepia' }, 'Warm / Sepia'),
@@ -272,11 +258,8 @@ export function createReaderView({
     },
     el(
       'div',
-      { className: 'reader-tool-group', role: 'group', 'aria-label': 'Datei' },
-      btnSidebar,
-      btnSave,
-      btnSaveAs,
-      btnPrint
+      { className: 'reader-tool-group', role: 'group', 'aria-label': 'Seitenleiste' },
+      btnSidebar
     ),
     el('span', { className: 'reader-separator', role: 'separator', 'aria-orientation': 'vertical' }),
     el(
@@ -341,19 +324,13 @@ export function createReaderView({
       readingModeSelect,
       btnSplit,
       btnSearchToggle,
-      btnFocusMode
+      btnFullscreenMode
     ),
     el('span', { className: 'reader-separator', role: 'separator', 'aria-orientation': 'vertical' }),
     el(
       'div',
       { className: 'reader-tool-group', role: 'group', 'aria-label': 'Werkzeuge' },
-      handoffSelect,
-      el('button', {
-        type: 'button',
-        className: 'tb-btn',
-        title: 'Zur Werkzeugübersicht',
-        onClick: onGoTools
-      }, 'Alle 33 Tools')
+      handoffSelect
     )
   );
   wireRovingFocusFallback(toolbar, () => Array.from(toolbar.querySelectorAll('button, select, input')));
@@ -491,7 +468,7 @@ export function createReaderView({
     }
   });
 
-  root.append(heading, tabBarRow, toolbar, searchBar, emptyState, bodyGrid, hiddenWebInput);
+  root.append(heading, tabBarRow, toolbar, searchBar, emptyState, bodyGrid, fullscreenExitBtn, hiddenWebInput);
 
   async function openFilePicker() {
     if (isDesktopApp()) {
@@ -531,12 +508,7 @@ export function createReaderView({
     secondaryPane.hidden = !isSplit;
     bodyGrid.classList.toggle('is-sidebar-collapsed', !prefs.sidebarOpen);
     bodyGrid.classList.toggle('is-split', isSplit);
-
-    const disabledVal = hasTabs ? null : 'true';
-    [btnSave, btnSaveAs, btnPrint].forEach((b) => {
-      if (disabledVal) b.setAttribute('aria-disabled', 'true');
-      else b.removeAttribute('aria-disabled');
-    });
+    notifyState();
   }
 
   function renderTabsBar() {
@@ -772,6 +744,57 @@ export function createReaderView({
     await primaryViewport.setLayoutOptions({ rotation: tab.rotation });
   }
 
+  function toggleSidebar() {
+    prefs.sidebarOpen = !prefs.sidebarOpen;
+    saveReaderPrefs({ sidebarOpen: prefs.sidebarOpen });
+    btnSidebar.setAttribute('aria-pressed', String(prefs.sidebarOpen));
+    syncBodyGridClasses();
+    primaryViewport.refit().catch(() => {});
+  }
+
+  function setViewMode(mode) {
+    if (!['single', 'two-page', 'book'].includes(mode)) return;
+    prefs.viewMode = mode;
+    viewModeSelect.value = mode;
+    saveReaderPrefs({ viewMode: mode });
+    primaryViewport.setLayoutOptions({ viewMode: mode });
+    notifyState();
+  }
+
+  function setReadingMode(mode) {
+    if (!['original', 'sepia', 'night'].includes(mode)) return;
+    prefs.readingMode = mode;
+    readingModeSelect.value = mode;
+    saveReaderPrefs({ readingMode: mode });
+    primaryViewport.setLayoutOptions({ readingMode: mode });
+    secondaryViewport.setLayoutOptions({ readingMode: mode });
+    notifyState();
+  }
+
+  function setFullscreenReading(next, { requestNative = false } = {}) {
+    fullscreenMode = Boolean(next);
+    document.documentElement.classList.toggle('is-fullscreen-reading', fullscreenMode);
+    btnFullscreenMode.setAttribute('aria-pressed', String(fullscreenMode));
+    fullscreenExitBtn.hidden = !fullscreenMode;
+    if (requestNative) {
+      if (fullscreenMode && !document.fullscreenElement) {
+        document.documentElement.requestFullscreen?.().catch(() => {});
+      } else if (!fullscreenMode && document.fullscreenElement) {
+        document.exitFullscreen?.().catch(() => {});
+      }
+    }
+    primaryViewport.refit().catch(() => {});
+    secondaryViewport.refit().catch(() => {});
+    notifyState();
+  }
+
+  function onNativeFullscreenChange() {
+    if (!document.fullscreenElement && fullscreenMode) {
+      setFullscreenReading(false, { requestNative: false });
+    }
+  }
+  document.addEventListener('fullscreenchange', onNativeFullscreenChange);
+
   async function cycleSplitMode() {
     const tabs = tabStore.state.tabs;
     if (!tabs.length) return;
@@ -915,17 +938,23 @@ export function createReaderView({
       handlePrint();
       return;
     }
+    if (mod && e.key.toLowerCase() === 'w') {
+      const tab = tabStore.getActiveTab();
+      if (tab) {
+        e.preventDefault();
+        closeReaderTab(tab.id);
+      }
+      return;
+    }
     const tag = document.activeElement?.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
     if (e.key === 'r' || e.key === 'R') {
       rotateView();
     } else if (e.key === 'F11') {
       e.preventDefault();
-      btnFocusMode.click();
-    } else if (e.key === 'Escape' && focusMode) {
-      focusMode = false;
-      root.classList.remove('is-focus-mode');
-      btnFocusMode.setAttribute('aria-pressed', 'false');
+      setFullscreenReading(!fullscreenMode, { requestNative: true });
+    } else if (e.key === 'Escape' && fullscreenMode) {
+      setFullscreenReading(false, { requestNative: true });
     }
   }
 
@@ -954,8 +983,32 @@ export function createReaderView({
   return {
     element: root,
     openPdfInReader,
+    openFilePicker,
+    handleSave,
+    handlePrint,
+    closeActiveTab: () => {
+      const tab = tabStore.getActiveTab();
+      if (tab) closeReaderTab(tab.id);
+    },
+    toggleSidebar,
+    setViewMode,
+    setReadingMode,
+    cycleSplitMode,
+    toggleSearchBar,
+    rotateView,
+    toggleFullscreen: () => setFullscreenReading(!fullscreenMode, { requestNative: true }),
+    handoffActiveToTool: (toolId) => {
+      const tab = tabStore.getActiveTab();
+      onSendToTool(toolId, tab ? { name: tab.name, bytes: tab.bytes, filePath: tab.filePath } : null);
+    },
+    getMenuState,
     cleanup: async () => {
       window.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('fullscreenchange', onNativeFullscreenChange);
+      document.documentElement.classList.remove('is-fullscreen-reading');
+      if (document.fullscreenElement) {
+        document.exitFullscreen?.().catch(() => {});
+      }
       primaryViewport.destroy();
       secondaryViewport.destroy();
       for (const [, doc] of pdfDocsCache) {

@@ -67,21 +67,36 @@ jobs:
           New-Item -ItemType Directory -Force -Path release-assets | Out-Null
           $files = Get-ChildItem -Path src-tauri/target/release/bundle -Recurse -Include *.exe, *.msi, *.sig -ErrorAction SilentlyContinue
           foreach ($f in $files) {
-            Copy-Item $f.FullName -Destination release-assets/ -Force
+            # Normalize whitespace to dots so uploaded GitHub Release filenames match latest.json URLs verbatim
+            $safeName = $f.Name -replace '\s+', '.'
+            Copy-Item $f.FullName -Destination (Join-Path 'release-assets' $safeName) -Force
           }
           $hashes = Get-ChildItem release-assets -File | Sort-Object Name | ForEach-Object {
             $h = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
             "$h  $($_.Name)"
           }
-          Set-Content release-assets/SHA256SUMS.txt ($hashes -join "`n") -Encoding UTF8
+          Set-Content release-assets/SHA256SUMS.txt ($hashes -join "`n") -Encoding utf8NoBOM
 
-          $tag = if ($env:GITHUB_REF_NAME -match '^v(.+)$') { $matches[1] } else { '1.0.0' }
+          $tag = if ($env:GITHUB_REF_NAME -match '^v(.+)$') { $matches[1] } else { '1.0.1' }
+          $notes = "Siehe GitHub-Release-Notizen fuer v$tag."
+          if (Test-Path CHANGELOG.md) {
+            $changelog = Get-Content CHANGELOG.md -Raw -Encoding UTF8
+            $escapedTag = [regex]::Escape($tag)
+            if ($changelog -match "(?ms)^##\s+v$escapedTag\s*\r?\n(.*?)(?=^##\s+|\z)") {
+              $extracted = $matches[1].Trim()
+              if (-not [string]::IsNullOrWhiteSpace($extracted)) {
+                $notes = $extracted
+              }
+            }
+          }
+          Set-Content release-assets/release-notes.txt $notes -Encoding utf8NoBOM
+
           $exe = Get-ChildItem release-assets -Filter '*setup.exe' | Select-Object -First 1
           $sig = if ($exe) { Get-Item "release-assets/$($exe.Name).sig" -ErrorAction SilentlyContinue } else { $null }
           if ($exe -and $sig) {
             $latest = @{
               version = $tag
-              notes = "Siehe GitHub-Release-Notizen fuer v$tag."
+              notes = $notes
               pub_date = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
               platforms = @{
                 "windows-x86_64" = @{
@@ -90,7 +105,7 @@ jobs:
                 }
               }
             } | ConvertTo-Json -Depth 5
-            Set-Content release-assets/latest.json $latest -Encoding UTF8
+            Set-Content release-assets/latest.json $latest -Encoding utf8NoBOM
           }
 
       - name: Create Draft GitHub Release
@@ -98,6 +113,10 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: pwsh
         run: |
-          $tag = if ($env:GITHUB_REF_NAME) { $env:GITHUB_REF_NAME } else { "v1.0.0" }
-          $assets = Get-ChildItem release-assets -File | ForEach-Object { $_.FullName }
-          gh release create $tag @assets --draft --generate-notes --title "Seelig PDF $tag"
+          $tag = if ($env:GITHUB_REF_NAME) { $env:GITHUB_REF_NAME } else { "v1.0.1" }
+          $assets = Get-ChildItem release-assets -File | Where-Object { $_.Name -ne 'release-notes.txt' } | ForEach-Object { $_.FullName }
+          if (Test-Path release-assets/release-notes.txt) {
+            gh release create $tag @assets --draft --notes-file release-assets/release-notes.txt --title "Seelig PDF $tag"
+          } else {
+            gh release create $tag @assets --draft --generate-notes --title "Seelig PDF $tag"
+          }

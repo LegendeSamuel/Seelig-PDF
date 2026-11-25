@@ -30,12 +30,19 @@ test.describe('Seelig PDF UI, Tools & Visual Fidelity', () => {
     await page.fill('#tool-search', '');
     await expect(page.locator('.tool-card')).toHaveCount(33);
 
-    // Footer screenshot
-    await page.locator('.site-footer').scrollIntoViewIfNeeded();
+    // Open Footer / About via Hilfe -> Über Seelig PDF & Rechtliches
+    await page.locator('#menu-help-trigger').click();
+    await expect(page.locator('#menu-help')).toBeVisible();
+    await page.locator('[data-menu-action="open-about"]').click();
+    await expect(page.locator('#about-dialog')).toBeVisible();
+    await expect(page.locator('#about-dialog .site-footer')).toBeVisible();
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '04-footer-desktop.png') });
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#about-dialog')).not.toBeVisible();
 
-    // Security dialog + Escape close
-    await page.locator('#nav-security-btn').click();
+    // Security dialog via Hilfe -> Sicherheitsarchitektur & Transparenz
+    await page.locator('#menu-help-trigger').click();
+    await page.locator('[data-menu-action="open-security"]').click();
     await expect(page.locator('#security-dialog')).toBeVisible();
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '02-security-dialog.png') });
     await page.keyboard.press('Escape');

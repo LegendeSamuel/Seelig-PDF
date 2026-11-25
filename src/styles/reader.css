@@ -1,30 +1,25 @@
-/* Seelig PDF Reader Layout, Accessible Tablist, Toolbar, TextLayer & Print */
+/* Seelig PDF Reader Layout: full-width edge-to-edge desktop software shell, single-scroll viewport */
 
 .reader-shell {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  min-height: calc(100dvh - var(--header-height) - 4rem);
-}
-
-.reader-shell.is-focus-mode {
-  position: fixed;
-  inset: 0;
-  z-index: 1500;
-  background: var(--bg);
-  padding: 0.75rem;
-  min-height: 100dvh;
+  gap: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 /* Tab Bar (modern-web-guidance: single horizontal scrollable row, aria-selected 3px underline) */
 .reader-tabbar-row {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
   background: var(--surface-card);
-  border: 1px solid var(--line-subtle);
-  border-radius: var(--radius-md);
-  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--line-subtle);
+  padding: 0.25rem 0.65rem;
 }
 
 .reader-tablist {
@@ -113,45 +108,45 @@
 
 /* Toolbar (modern-web-guidance: role="toolbar", role="group", role="separator") */
 .reader-toolbar {
+  flex: 0 0 auto;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.45rem 0.65rem;
-  background: var(--surface-card);
-  border: 1px solid var(--line-subtle);
-  border-radius: var(--radius-md);
-  padding: 0.5rem 0.75rem;
+  gap: 0.35rem 0.45rem;
+  background: #151515;
+  border-bottom: 1px solid var(--line-subtle);
+  padding: 0.3rem 0.65rem;
 }
 
 .reader-tool-group {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.28rem;
   flex-wrap: wrap;
 }
 
 .reader-separator {
   width: 1px;
-  height: 1.65rem;
+  height: 1.45rem;
   border-inline-start: 1px solid var(--line-control);
-  margin: 0 0.15rem;
+  margin: 0 0.1rem;
 }
 
 .tb-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
+  gap: 0.3rem;
   white-space: nowrap;
-  min-inline-size: 2.35rem;
-  min-block-size: 2.35rem;
-  padding: 0.35rem 0.65rem;
+  min-inline-size: 2rem;
+  min-block-size: 2rem;
+  padding: 0.28rem 0.55rem;
   background: var(--fill-chip);
   border: 1px solid var(--line-subtle);
   border-radius: var(--radius-xs);
   color: var(--text-soft);
   font-family: inherit;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 500;
   cursor: pointer;
 }
@@ -176,44 +171,47 @@
 }
 
 .tb-select {
-  min-height: 2.35rem !important;
-  padding: 0.25rem 0.6rem !important;
-  font-size: 0.85rem !important;
+  min-height: 2rem !important;
+  max-width: 175px;
+  padding: 0.2rem 0.48rem !important;
+  font-size: 0.82rem !important;
   border-radius: var(--radius-xs) !important;
 }
 
 .tb-page-input {
-  width: 3.6rem;
-  min-height: 2.35rem !important;
-  padding: 0.2rem 0.4rem !important;
+  width: 3.2rem;
+  min-height: 2rem !important;
+  padding: 0.15rem 0.35rem !important;
   text-align: center;
-  font-size: 0.86rem !important;
+  font-size: 0.82rem !important;
   border-radius: var(--radius-xs) !important;
 }
 
 .reader-search-bar {
+  flex: 0 0 auto;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
   background: var(--surface-card);
-  border: 1px solid var(--amber);
-  border-radius: var(--radius-md);
-  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--amber);
+  padding: 0.4rem 0.65rem;
 }
 
 .reader-search-bar input {
   flex: 1 1 220px;
-  min-height: 40px !important;
+  min-height: 36px !important;
 }
 
-/* Reader Body: Collapsible Sidebar + Primary/Split Viewports */
+/* Reader Body: Collapsible Sidebar + Primary/Split Viewports filling remaining height */
 .reader-body {
-  display: grid;
-  grid-template-columns: 270px minmax(0, 1fr);
-  gap: 0.75rem;
   flex: 1 1 auto;
-  min-height: 68dvh;
+  min-height: 0;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+  gap: 0;
+  overflow: hidden;
 }
 
 .reader-body.is-sidebar-collapsed {
@@ -221,7 +219,7 @@
 }
 
 .reader-body.is-split {
-  grid-template-columns: 270px minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: 248px minmax(0, 1fr) minmax(0, 1fr);
 }
 
 .reader-body.is-sidebar-collapsed.is-split {
@@ -229,12 +227,12 @@
 }
 
 .reader-sidebar {
-  background: var(--surface-card);
-  border: 1px solid var(--line-subtle);
-  border-radius: var(--radius-md);
+  background: #141414;
+  border-right: 1px solid var(--line-subtle);
   display: flex;
   flex-direction: column;
-  max-height: 76dvh;
+  height: 100%;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -330,35 +328,42 @@
   border-color: var(--amber);
 }
 
-/* Viewport Scroller */
+/* Viewport Scroller: sole scroll surface inside Reader */
 .reader-pane {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0;
   min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.reader-pane + .reader-pane {
+  border-left: 1px solid var(--line-subtle);
 }
 
 .reader-pane-header {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
   padding: 0.3rem 0.65rem;
-  background: var(--surface-card);
-  border: 1px solid var(--line-subtle);
-  border-radius: var(--radius-xs);
+  background: #151515;
+  border-bottom: 1px solid var(--line-subtle);
   font-size: 0.82rem;
   color: var(--text-muted);
 }
 
 .reader-viewport-scroller {
   flex: 1 1 auto;
-  height: 76dvh;
+  min-height: 0;
+  height: 100%;
   overflow: auto;
+  overscroll-behavior: contain;
   background: #0d0d0d;
-  border: 1px solid var(--line-subtle);
-  border-radius: var(--radius-md);
-  padding: 1.5rem 1rem;
+  padding: 1.5rem 1.25rem;
 }
 
 .reader-pages-host {
@@ -441,11 +446,16 @@
 }
 
 .reader-empty-state {
-  max-width: 680px;
-  margin: 2rem auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  width: min(720px, 100%);
+  margin: auto;
+  padding: 2rem 1rem;
   text-align: center;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: var(--space-3);
 }
 
@@ -455,7 +465,8 @@
 }
 
 @media print {
-  header.sd-header,
+  header.app-topbar,
+  .fullscreen-exit-pill,
   footer.site-footer,
   main.app-main,
   dialog {
@@ -484,13 +495,16 @@
   .reader-body,
   .reader-body.is-split {
     grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
   }
 
   .reader-sidebar {
-    max-height: 260px;
+    max-height: 190px;
+    border-right: none;
+    border-bottom: 1px solid var(--line-subtle);
   }
 
   .reader-viewport-scroller {
-    height: 62dvh;
+    padding: 0.85rem 0.5rem;
   }
 }

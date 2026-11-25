@@ -12,45 +12,128 @@
 <body>
   <a href="#main-content" class="skip-link visually-hidden">Zum Inhalt springen</a>
 
-  <header class="sd-header">
-    <div class="sd-header-inner">
+  <header class="app-topbar">
+    <div class="app-topbar-left">
       <a href="#/" class="brand-link" id="brand-home-link" aria-label="Seelig PDF Startseite">
-        <img src="/assets/brand/wordmark-white.svg" alt="Seelig Designs" class="brand-wordmark" id="brand-wordmark-img">
+        <img src="/assets/brand/mark-white.svg" alt="Seelig Designs" class="brand-mark-compact" id="brand-wordmark-img">
         <span class="brand-badge" id="brand-badge-text">PDF</span>
       </a>
-      <nav class="nav-primary" aria-label="Hauptnavigation">
-        <ul>
-          <li><a href="#/" class="nav-link" id="nav-hub-link">Alle Werkzeuge</a></li>
-          <li><a href="#/reader" class="nav-link" id="nav-reader-link">PDF-Reader</a></li>
-          <li>
-            <button
-              type="button"
-              class="nav-link"
-              id="nav-security-btn"
-              command="show-modal"
-              commandfor="security-dialog"
-            >Sicherheit</button>
-          </li>
-          <li>
-            <button
-              type="button"
-              class="nav-link"
-              id="nav-updates-btn"
-              hidden
-            >Updates</button>
-          </li>
-          <li>
-            <a
-              href="https://seelig-designs.eu/"
-              class="nav-link"
-              id="nav-website-link"
-              target="_blank"
-              rel="noopener noreferrer"
-            >Seelig Designs</a>
-          </li>
-        </ul>
-      </nav>
+
+      <div class="app-menubar" role="menubar" aria-label="Anwendungsmenü">
+        <button
+          id="menu-file-trigger"
+          type="button"
+          class="menubar-trigger"
+          role="menuitem"
+          aria-haspopup="menu"
+          aria-expanded="false"
+          commandfor="menu-file"
+          command="toggle-popover"
+          tabindex="0"
+        >Datei</button>
+        <div id="menu-file" popover="auto" class="app-menu-popover">
+          <div focusgroup="menu nomemory" aria-labelledby="menu-file-trigger">
+            <button type="button" data-menu-action="file-open">PDF öffnen …<span class="hint" aria-hidden="true">Strg+O</span></button>
+            <hr>
+            <button type="button" data-menu-action="file-save">Speichern<span class="hint" aria-hidden="true">Strg+S</span></button>
+            <button type="button" data-menu-action="file-save-as">Speichern unter …<span class="hint" aria-hidden="true">Strg+Umschalt+S</span></button>
+            <button type="button" data-menu-action="file-print">Drucken …<span class="hint" aria-hidden="true">Strg+P</span></button>
+            <hr>
+            <button type="button" data-menu-action="file-close-tab">Aktiven Tab schließen<span class="hint" aria-hidden="true">Strg+W</span></button>
+          </div>
+        </div>
+
+        <button
+          id="menu-view-trigger"
+          type="button"
+          class="menubar-trigger"
+          role="menuitem"
+          aria-haspopup="menu"
+          aria-expanded="false"
+          commandfor="menu-view"
+          command="toggle-popover"
+          tabindex="-1"
+        >Ansicht</button>
+        <div id="menu-view" popover="auto" class="app-menu-popover">
+          <div focusgroup="menu nomemory" aria-labelledby="menu-view-trigger">
+            <button type="button" role="menuitemcheckbox" aria-checked="false" data-menu-action="view-fullscreen">Vollansicht<span class="hint" aria-hidden="true">F11</span></button>
+            <button type="button" role="menuitemcheckbox" aria-checked="true" data-menu-action="view-sidebar">Seitenleiste</button>
+            <button type="button" role="menuitemcheckbox" aria-checked="false" data-menu-action="view-split">Split-View</button>
+            <hr>
+            <div role="group" aria-label="Seitenlayout">
+              <button type="button" role="menuitemradio" aria-checked="true" data-menu-action="view-mode-single">Einzelseite</button>
+              <button type="button" role="menuitemradio" aria-checked="false" data-menu-action="view-mode-two-page">Zwei Seiten</button>
+              <button type="button" role="menuitemradio" aria-checked="false" data-menu-action="view-mode-book">Buchansicht</button>
+            </div>
+            <hr>
+            <div role="group" aria-label="Lesemodus">
+              <button type="button" role="menuitemradio" aria-checked="true" data-menu-action="reading-mode-original">Original</button>
+              <button type="button" role="menuitemradio" aria-checked="false" data-menu-action="reading-mode-sepia">Warm / Sepia</button>
+              <button type="button" role="menuitemradio" aria-checked="false" data-menu-action="reading-mode-night">Nachtmodus</button>
+            </div>
+            <hr>
+            <button type="button" data-menu-action="view-search">Im Dokument suchen …<span class="hint" aria-hidden="true">Strg+F</span></button>
+            <button type="button" data-menu-action="view-rotate">Um 90° drehen<span class="hint" aria-hidden="true">R</span></button>
+          </div>
+        </div>
+
+        <button
+          id="menu-tools-trigger"
+          type="button"
+          class="menubar-trigger"
+          role="menuitem"
+          aria-haspopup="menu"
+          aria-expanded="false"
+          commandfor="menu-tools"
+          command="toggle-popover"
+          tabindex="-1"
+        >Werkzeuge</button>
+        <div id="menu-tools" popover="auto" class="app-menu-popover">
+          <div focusgroup="menu nomemory" aria-labelledby="menu-tools-trigger">
+            <button type="button" data-menu-action="go-hub">Alle 33 Werkzeuge (Übersicht)</button>
+            <hr>
+            <button type="button" data-menu-tool="compress">PDF komprimieren</button>
+            <button type="button" data-menu-tool="redact">PDF sicher schwärzen</button>
+            <button type="button" data-menu-tool="sign">PDF unterschreiben</button>
+            <button type="button" data-menu-tool="annotate">PDF kommentieren</button>
+            <button type="button" data-menu-tool="merge">PDF zusammenfügen</button>
+            <button type="button" data-menu-tool="split">PDF trennen</button>
+            <button type="button" data-menu-tool="protect">PDF verschlüsseln (AES-256)</button>
+            <button type="button" data-menu-tool="strip-metadata">Metadaten entfernen</button>
+          </div>
+        </div>
+
+        <button
+          id="menu-help-trigger"
+          type="button"
+          class="menubar-trigger"
+          role="menuitem"
+          aria-haspopup="menu"
+          aria-expanded="false"
+          commandfor="menu-help"
+          command="toggle-popover"
+          tabindex="-1"
+        >Hilfe</button>
+        <div id="menu-help" popover="auto" class="app-menu-popover">
+          <div focusgroup="menu nomemory" aria-labelledby="menu-help-trigger">
+            <button type="button" data-menu-action="open-security">Sicherheitsarchitektur &amp; Transparenz</button>
+            <button type="button" data-menu-action="open-updates">Nach Updates suchen …</button>
+            <button type="button" data-menu-action="open-about">Über Seelig PDF &amp; Rechtliches</button>
+            <hr>
+            <a href="https://github.com/LegendeSamuel/Seelig-PDF/releases" id="menu-releases-link" target="_blank" rel="noopener noreferrer">GitHub Releases</a>
+            <a href="https://seelig-designs.eu/" id="nav-website-link" target="_blank" rel="noopener noreferrer">Seelig Designs Website</a>
+            <a href="https://seelig-designs.eu/imprint.html" id="menu-imprint-link" target="_blank" rel="noopener noreferrer">Impressum</a>
+            <a href="https://seelig-designs.eu/privacy-policy.html" id="menu-privacy-link" target="_blank" rel="noopener noreferrer">Datenschutz</a>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <nav class="app-topbar-right" aria-label="Modus">
+      <a href="#/reader" class="mode-switch-link" id="nav-reader-link">PDF-Reader</a>
+      <a href="#/" class="mode-switch-link" id="nav-hub-link">33 Werkzeuge</a>
+      <button type="button" class="mode-switch-link" id="nav-updates-btn" hidden>Updates</button>
+    </nav>
   </header>
 
   <main class="app-main">
@@ -85,38 +168,46 @@
     <div id="updater-dialog-body" class="dialog-body"></div>
   </dialog>
 
-  <footer class="site-footer">
-    <div class="footer-container">
-      <div class="footer-logo">
-        <a href="https://seelig-designs.eu/" id="footer-website-link" target="_blank" rel="noopener noreferrer" aria-label="Seelig Designs Website">
-          <img src="/assets/brand/mark-black.svg" alt="Seelig Designs" id="footer-mark-img">
-        </a>
-      </div>
-      <nav class="footer-nav" aria-label="Rechtliches und Links">
-        <ul>
-          <li><a href="#/">Alle Werkzeuge</a></li>
-          <li><a href="#/reader">PDF-Reader</a></li>
-          <li><button type="button" id="footer-security-btn" command="show-modal" commandfor="security-dialog">Sicherheit</button></li>
-          <li><a href="https://seelig-designs.eu/imprint.html" id="footer-imprint-link" target="_blank" rel="noopener noreferrer">Impressum</a></li>
-          <li><a href="https://seelig-designs.eu/privacy-policy.html" id="footer-privacy-link" target="_blank" rel="noopener noreferrer">Datenschutz</a></li>
-        </ul>
-      </nav>
-      <div class="footer-contact">
-        <a href="mailto:info@seelig-designs.eu" id="footer-email-link" aria-label="E-Mail schreiben">
-          <img src="/assets/icons/email.svg" alt="" class="footer-icon">
-        </a>
-        <a href="https://www.instagram.com/samuel.seelig/" id="footer-instagram-link" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-          <img src="/assets/icons/instagram.svg" alt="" class="footer-icon">
-        </a>
-        <a href="https://www.pexels.com/de-de/@samuel-seelig-5998373/" id="footer-portfolio-link" target="_blank" rel="noopener noreferrer" aria-label="Pexels Portfolio">
-          <img src="/assets/icons/camera.svg" alt="" class="footer-icon">
-        </a>
-      </div>
+  <dialog id="about-dialog" closedby="any" aria-labelledby="about-dialog-title">
+    <div class="dialog-header">
+      <h1 id="about-dialog-title">Über Seelig PDF &amp; Rechtliches</h1>
+      <button type="button" class="slider-btn" id="about-dialog-close" command="close" commandfor="about-dialog" aria-label="Info-Dialog schließen" autofocus>×</button>
     </div>
-    <div class="footer-bottom-bar">
-      <p id="footer-copyright-line">© 2026 Samuel Seelig · Seelig PDF · Verarbeitung ausschließlich lokal</p>
+    <div class="dialog-body about-dialog-body">
+      <footer class="site-footer about-footer-surface">
+        <div class="footer-container">
+          <div class="footer-logo">
+            <a href="https://seelig-designs.eu/" id="footer-website-link" target="_blank" rel="noopener noreferrer" aria-label="Seelig Designs Website">
+              <img src="/assets/brand/mark-black.svg" alt="Seelig Designs" id="footer-mark-img">
+            </a>
+          </div>
+          <nav class="footer-nav" aria-label="Rechtliches und Links">
+            <ul>
+              <li><a href="#/" id="footer-hub-link">Alle Werkzeuge</a></li>
+              <li><a href="#/reader" id="footer-reader-link">PDF-Reader</a></li>
+              <li><button type="button" id="footer-security-btn" command="show-modal" commandfor="security-dialog">Sicherheit</button></li>
+              <li><a href="https://seelig-designs.eu/imprint.html" id="footer-imprint-link" target="_blank" rel="noopener noreferrer">Impressum</a></li>
+              <li><a href="https://seelig-designs.eu/privacy-policy.html" id="footer-privacy-link" target="_blank" rel="noopener noreferrer">Datenschutz</a></li>
+            </ul>
+          </nav>
+          <div class="footer-contact">
+            <a href="mailto:info@seelig-designs.eu" id="footer-email-link" aria-label="E-Mail schreiben">
+              <img src="/assets/icons/email.svg" alt="" class="footer-icon">
+            </a>
+            <a href="https://www.instagram.com/samuel.seelig/" id="footer-instagram-link" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+              <img src="/assets/icons/instagram.svg" alt="" class="footer-icon">
+            </a>
+            <a href="https://www.pexels.com/de-de/@samuel-seelig-5998373/" id="footer-portfolio-link" target="_blank" rel="noopener noreferrer" aria-label="Pexels Portfolio">
+              <img src="/assets/icons/camera.svg" alt="" class="footer-icon">
+            </a>
+          </div>
+        </div>
+        <div class="footer-bottom-bar">
+          <p id="footer-copyright-line">© 2026 Samuel Seelig · Seelig PDF · Verarbeitung ausschließlich lokal</p>
+        </div>
+      </footer>
     </div>
-  </footer>
+  </dialog>
 
   <script type="module" src="/src/main.js"></script>
 </body>
