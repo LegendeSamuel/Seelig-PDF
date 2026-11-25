@@ -43,6 +43,7 @@ export function createPdfViewport({
 
   const pageSlots = new Map(); // pageNum -> { wrap, canvas, textLayer, renderState, baseWidth, baseHeight }
   const activeRenderQueue = new Set();
+  let renderGeneration = 0;
 
   function computeScaleForPage(baseW, baseH) {
     const availW = Math.max(220, scroller.clientWidth - (currentMode === 'single' ? 48 : 96));
@@ -86,12 +87,15 @@ export function createPdfViewport({
     }
   }
 
-  async function renderSlot(pageNumber, slot) {
-    if (!pdfDoc || slot.rendered || activeRenderQueue.has(pageNumber)) return;
-    activeRenderQueue.add(pageNumber);
+  async function renderSlot(pageNumber, slot, gen = renderGeneration) {
+    const docRef = pdfDoc;
+    const queueKey = `${gen}:${pageNumber}`;
+    if (!docRef || slot.rendered || gen !== renderGeneration || activeRenderQueue.has(queueKey)) return;
+    activeRenderQueue.add(queueKey);
     try {
-      const page = await pdfDoc.getPage(pageNumber);
+      const page = await docRef.getPage(pageNumber);
       try {
+        if (gen !== renderGeneration || pdfDoc !== docRef) return;
         const rot = (page.rotate + currentRotation) % 360;
         const base = page.getViewport({ scale: 1, rotation: rot });
         const scale = computeScaleForPage(base.width, base.height);
@@ -115,8 +119,10 @@ export function createPdfViewport({
         ctx.fillRect(0, 0, targetW, targetH);
 
         await page.render({ canvasContext: ctx, viewport }).promise;
+        if (gen !== renderGeneration || pdfDoc !== docRef) return;
 
         const textContent = await page.getTextContent();
+        if (gen !== renderGeneration || pdfDoc !== docRef) return;
         const pageMatches = searchMatches.filter((m) => m.pageNumber === pageNumber);
         renderSafeTextLayer({
           container: slot.textLayer,
@@ -132,25 +138,31 @@ export function createPdfViewport({
         page.cleanup();
       }
     } catch (err) {
-      onError(err instanceof Error ? err.message : 'Fehler beim Rendern der Seite.');
+      if (gen === renderGeneration) {
+        onError(err instanceof Error ? err.message : 'Fehler beim Rendern der Seite.');
+      }
     } finally {
-      activeRenderQueue.delete(pageNumber);
+      activeRenderQueue.delete(queueKey);
     }
   }
 
   async function buildDomSlots() {
+    const gen = ++renderGeneration;
+    activeRenderQueue.clear();
     if (observer) {
       observer.disconnect();
       observer = null;
     }
     clear(pagesHost);
     pageSlots.clear();
-    if (!pdfDoc) return;
+    const docRef = pdfDoc;
+    if (!docRef) return;
 
-    const firstPage = await pdfDoc.getPage(1);
+    const firstPage = await docRef.getPage(1);
     const firstRot = (firstPage.rotate + currentRotation) % 360;
     const baseVp = firstPage.getViewport({ scale: 1, rotation: firstRot });
     firstPage.cleanup();
+    if (gen !== renderGeneration || pdfDoc !== docRef) return;
 
     const estScale = computeScaleForPage(baseVp.width, baseVp.height);
     const estW = Math.round(baseVp.width * estScale);
@@ -183,13 +195,14 @@ export function createPdfViewport({
     const visibleSet = new Set();
     observer = new IntersectionObserver(
       (entries) => {
+        if (gen !== renderGeneration) return;
         for (const entry of entries) {
           const pNum = Number(entry.target.dataset.pageNumber);
           const slot = pageSlots.get(pNum);
           if (!slot) continue;
           if (entry.isIntersecting) {
             visibleSet.add(pNum);
-            renderSlot(pNum, slot);
+            renderSlot(pNum, slot, gen);
           } else {
             visibleSet.delete(pNum);
           }
@@ -296,6 +309,8 @@ export function createPdfViewport({
   }
 
   function destroy() {
+    renderGeneration++;
+    activeRenderQueue.clear();
     if (resizeObs) resizeObs.disconnect();
     if (resizeTimer) clearTimeout(resizeTimer);
     if (observer) observer.disconnect();

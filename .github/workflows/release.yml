@@ -65,10 +65,7 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path release-assets | Out-Null
-          $files = Get-ChildItem -Path src-tauri/target/release/bundle, C:/Users -Recurse -Include *.exe, *.msi, *.sig -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'bundle' }
-          if (-not $files) {
-            $files = Get-ChildItem -Recurse -Path . -Include *.exe, *.msi, *.sig | Where-Object { $_.FullName -match 'bundle' }
-          }
+          $files = Get-ChildItem -Path src-tauri/target/release/bundle -Recurse -Include *.exe, *.msi, *.sig -ErrorAction SilentlyContinue
           foreach ($f in $files) {
             Copy-Item $f.FullName -Destination release-assets/ -Force
           }
